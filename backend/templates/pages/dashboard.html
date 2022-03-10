@@ -6,6 +6,19 @@
 </head>
 <body>
     <h1>This is the dashboard</h1>
-    <p></p>
+    <p>Write the name of the stock you want to search</p>
+    <form action="" method="post">
+        <input/>
+        <input type="submit"/>
+    </form>
+
+    {% if show_rmse_calculation %}
+        <p>RMSE: {{ rmse_value }}</p>
+    {% endif %}
+
+    {% if show_mape_calculation %}
+        <p>MAPE: {{ mape_value }}%</p>
+    {% endif %}
+
 </body>
 </html>
