@@ -1,6 +1,8 @@
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import LSTM
+
+
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -62,10 +64,10 @@ def main():
     # Data preprocessing
     data_test = []
     x_train, y_train = create_dataset(data)
-    x_test, y_test = create_dataset(data_test)
+    #x_test, y_test = create_dataset(data_test)
 
     x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], 1)
-    x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], 1)
+    #x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], 1)
 
     ##################################
     # Build and train the LSTM model #
@@ -91,14 +93,12 @@ def main():
     # Make predictions #
     ####################
     prediction_stock_price = lstm_model.predict(x_test)
-    prediction_stock_price = scaler.inverse_transform(prediction_stock_price)
+    # prediction_stock_price = scaler.inverse_transform(prediction_stock_price)
 
     #####################
     # Visualize results #
     #####################
     plot_stock_trend(x_train, prediction_stock_price, symbol)
-
-
 
 
 if __name__ == "__main__":
