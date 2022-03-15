@@ -10,7 +10,7 @@ API_KEY = "KW8CD0CRFLR2LKS0"
 
 
 def get_stock_price(symbol: str):
-    url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&apikey=demo'
+    url = 'https://www.alphavantage.co/query'
     params = {"function": "TIME_SERIES_DAILY", "symbol": symbol, "apikey": API_KEY, "outputsize": "compact"}
     try:
         r = requests.get(url, params=params)
@@ -62,18 +62,43 @@ def main():
     # Data preprocessing
     data_test = []
     x_train, y_train = create_dataset(data)
-    plot_stock_trend(x_train, y_train, symbol)
     x_test, y_test = create_dataset(data_test)
 
-    # LSTM
     x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], 1)
     x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], 1)
 
-    # Sequential model
+    ##################################
+    # Build and train the LSTM model #
+    ##################################
+    lstm_model = Sequential()
+    # First layer
+    lstm_model.add(LSTM(units=50, return_sequences=True, input_shape=(x_train, 1)))
 
-    # Prediction
+    # Second layer
+    lstm_model.add(LSTM(units=50))
+    lstm_model.add(Dense(1))
 
-    # Conclusion
+    # Compiling the RNN (Recurrent Neuronal Network)
+    lstm_model.compile(optimizer="adam", loss='mean_squared_error')
+    # Fitting the RNN to the Training set
+    lstm_model.fit(x_train, y_train, epochs=100, batch_size=32)
+
+    #########################
+    # Prepare the test data #
+    #########################
+
+    ####################
+    # Make predictions #
+    ####################
+    prediction_stock_price = lstm_model.predict(x_test)
+    prediction_stock_price = scaler.inverse_transform(prediction_stock_price)
+
+    #####################
+    # Visualize results #
+    #####################
+    plot_stock_trend(x_train, prediction_stock_price, symbol)
+
+
 
 
 if __name__ == "__main__":
