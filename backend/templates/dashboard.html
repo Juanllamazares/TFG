@@ -1,14 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block body %}
     <h1>This is the dashboard</h1>
     <p>Write the name of the stock you want to search</p>
     <form action="" method="post">
-        <input/>
+        <input type="text" id="symbol" name="symbol" required>
         <input type="submit"/>
     </form>
 
@@ -20,5 +15,4 @@
         <p>MAPE: {{ mape_value }}%</p>
     {% endif %}
 
-</body>
-</html>
+{% endblock %}

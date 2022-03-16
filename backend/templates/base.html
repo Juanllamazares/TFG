@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+    {% block scripts %}
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    {% endblock %}
+
+    {# Cargamos la librería #}
+    {% load bootstrap5 %}
+
+    {# CSS Bootstrap #}
+    {% bootstrap_css %}
+</head>
+<body>
+    {% include "navbar.html" %}
+    {% block body %}
+    {% endblock %}
+</body>
+</html>
