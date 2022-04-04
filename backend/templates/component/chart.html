@@ -1,0 +1,28 @@
+<div>
+    <h2>Symbol: {{stock.symbol}}</h2>
+    <div id="container" style="width: 75%;">
+        <canvas id="line-chart" width="800" height="450"></canvas>
+    </div>
+</div>
+{% block javascript %}
+<script>
+    new Chart(document.getElementById("line-chart"), {
+        type: 'line',
+        data: {
+            labels: {{ stock.labels | safe}},
+            datasets: [{
+                data: {{ stock.data | safe}},
+                label: "test",
+                borderColor: "#3e95cd",
+                fill: false
+            }]
+        },
+        options: {
+            title: {
+                display: true,
+                text: 'World population per region (in millions)'
+            }
+        }
+    });
+</script>
+{% endblock %}

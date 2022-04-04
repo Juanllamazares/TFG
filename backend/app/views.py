@@ -1,5 +1,8 @@
+import json
+
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+import main
 
 
 # Create your views here.
@@ -12,10 +15,26 @@ def home(request):
 def dashboard(request):
     context_dict = {}
     if request.method == 'POST':
-        context_dict["show_rmse_calculation"] = True
-        context_dict["show_mape_calculation"] = True
-        context_dict["rmse_value"] = 10.2
-        context_dict["mape_value"] = 3
+        symbol = request.POST.get("symbol")
+        data = main.get_stock_price(symbol)
+
+        date_list = list(data.keys())
+        close_price_list = []
+        for key, values in data.items():
+            close_price_list.append(values["4. close"])
+        stock_dict = {
+            "symbol": symbol,
+            "labels": json.dumps(date_list),
+            "data": json.dumps(close_price_list)
+        }
+
+        context_dict = {
+            "full_view": True,
+            "rmse_value": 10.2,
+            "mape_value": 3,
+            "stock": stock_dict,
+            "labels": json.dumps(date_list)
+        }
     else:
         context_dict["test"] = 0
     return render(request, 'dashboard.html', context=context_dict)

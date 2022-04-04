@@ -1,18 +1,24 @@
 {% extends "base.html" %}
 {% block body %}
+<div class="">
     <h1>This is the dashboard</h1>
     <p>Write the name of the stock you want to search</p>
-    <form action="" method="post">
-        <input type="text" id="symbol" name="symbol" required>
-        <input type="submit"/>
-    </form>
+    <div>
+        <form action="" method="post">
+            <input type="text" id="symbol" name="symbol" required>
+            <input type="submit" value="Search"/>
+        </form>
+    </div>
 
-    {% if show_rmse_calculation %}
-        <p>RMSE: {{ rmse_value }}</p>
-    {% endif %}
+    {% if full_view %}
 
-    {% if show_mape_calculation %}
-        <p>MAPE: {{ mape_value }}%</p>
+    {% include "component/chart.html" %}
+    <p>RMSE: {{ rmse_value }}</p>
+
+    <p>MAPE: {{ mape_value }}%</p>
+
     {% endif %}
+</div>
+
 
 {% endblock %}
