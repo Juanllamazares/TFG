@@ -10,6 +10,7 @@ import pandas as pd
 import csv
 import requests
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import classification_report, confusion_matrix
 
 API_KEY = "KW8CD0CRFLR2LKS0"
 
@@ -103,9 +104,11 @@ def main():
 
     # Normalize data
     scaler = MinMaxScaler(feature_range=(0, 1))
-    scaled_data = scaler.fit_transform(np.reshape(y))
+    scaled_data = scaler.fit_transform(y.reshape(-1, 1))
 
-    x_train, x_val, y_train, y_val = train_test_split(x, y, stratify=y, test_size=0.2)
+    # Create training and test data
+    train = scaled_data[0:train_size]
+    test = scaled_data[train_size - test_size:train_size]
 
     # x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], 1)
     # x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], 1)
@@ -113,43 +116,66 @@ def main():
     ##################################
     # Build and train the LSTM model #
     ##################################
-    lstm_model = Sequential()
-    # First layer
-    lstm_model.add(LSTM(units=50, return_sequences=True, input_shape=(x_train, 1)))
-
-    # Second layer
-    lstm_model.add(LSTM(units=50))
-    lstm_model.add(Dense(1))
-
     metrics = [
         keras.metrics.RootMeanSquaredError(name="oot_mean_squared_error"),  # RMSE
         keras.metrics.MeanAbsolutePercentageError(name="mean_absolute_percentage_error"),  # MAPE
     ]
 
-    # Compiling the RNN (Recurrent Neuronal Network)
-    lstm_model.compile(optimizer="adam", loss='mean_squared_error', metrics=metrics)
+    lstm_model = keras.models.load_model("models/lstm_model.h5")
+    # lstm_model = create_lstm_model(train)
+    # lstm_model.save("models/lstm_model.h5")
 
-    # Fitting the RNN to the Training set
-    lstm_model.fit(x_train, y_train, epochs=100, batch_size=32)
+    #############################
+    # Make predictions and test #
+    #############################
+    train_predict = lstm_model.predict(train)
+    test_predict = lstm_model.predict(test)
 
+    # Invert scaling for forecast
+    train_predict = scaler.inverse_transform(train_predict)
+    train = scaler.inverse_transform(train)
+    test_predict = scaler.inverse_transform(test_predict)
+    test = scaler.inverse_transform(test)
 
-    ####################
-    # Make predictions #
-    ####################
-    prediction_stock_price = lstm_model.predict(x_test)
-    # prediction_stock_price = scaler.inverse_transform(prediction_stock_price)
-
-    #####################
-    # Visualize results #
-    #####################
-
-    plot_stock_trend(x_train, prediction_stock_price, symbol)
+    #############################
+    # Plot the results #
+    #############################
+    # Plot the results
+    # plot_stock_trend(x[train_size:], train, symbol)
+    # plot_stock_trend(x[train_size:], train_predict, symbol)
+    # plot_stock_trend(x[train_size:], test, symbol)
+    # plot_stock_trend(x[train_size:], test_predict, symbol)
 
     # Matriz de confusion
-    # print(confusion_matrix(y_val, y_pred))
+    print(confusion_matrix(test, test_predict))
+
+    #############################
+    # Evaluate the model #
+    #############################
+    # Evaluate the model
+    # print("\n\nEvaluate the model")
+    # print("\nTrain set:")
+    # metrics.evaluate_model(train, train_predict, metrics)
+    # print("\nTest set:")
+    # metrics.evaluate_model(test, test_predict, metrics)
 
     # Observa la medida macro-f1 del siguiente informe
-    # print(classification_report(y_val, y_pred, zero_division=0))
+    print(classification_report(test, test_predict, zero_division=0))
+
+
+def create_lstm_model(train):
+    lstm_model = Sequential()
+    # First layer
+    lstm_model.add(LSTM(units=50, return_sequences=True, input_shape=(train.shape[1], 1)))
+    # lstm_model.add(LSTM(units=50, return_sequences=True, input_shape=(train, 1)))
+    # Second layer
+    lstm_model.add(LSTM(units=50))
+    lstm_model.add(Dense(1))
+    # Compiling the RNN (Recurrent Neuronal Network)
+    lstm_model.compile(optimizer="adam", loss='mean_squared_error', metrics=metrics)
+    # Fitting the RNN to the Training set
+    lstm_model.fit(train, train, epochs=100, batch_size=1, verbose=2)
+    return lstm_model
 
 
 if __name__ == "__main__":
