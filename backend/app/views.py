@@ -22,6 +22,9 @@ def dashboard(request):
         close_price_list = []
         for key, values in data.items():
             close_price_list.append(values["4. close"])
+
+        date_list.reverse()
+        close_price_list.reverse()
         stock_dict = {
             "symbol": symbol,
             "labels": json.dumps(date_list),

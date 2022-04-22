@@ -1,5 +1,4 @@
 <div>
-    <h2>Symbol: {{stock.symbol}}</h2>
     <div id="container" style="width: 75%;">
         <canvas id="line-chart" width="800" height="450"></canvas>
     </div>
@@ -12,15 +11,37 @@
             labels: {{ stock.labels | safe}},
             datasets: [{
                 data: {{ stock.data | safe}},
-                label: "test",
+                label: "Actual stock price",
                 borderColor: "#3e95cd",
                 fill: false
             }]
         },
         options: {
-            title: {
-                display: true,
-                text: 'World population per region (in millions)'
+            plugins:{
+                legend: {
+                    display: true
+                },
+                tooltips: {
+                    enabled: false
+                }
+            },
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Close price'
+                    }
+                }],
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Date'
+                    },
+                    ticks: {
+                        autoSkip: true,
+                        maxTicksLimit: 25
+                    }
+                }],
             }
         }
     });
