@@ -10,7 +10,7 @@ import pandas as pd
 import csv
 import requests
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import classification_report, confusion_matrix
+from keras import backend
 
 API_KEY = "KW8CD0CRFLR2LKS0"
 
@@ -67,6 +67,15 @@ def create_dataset(dataset):
     return np.array(data_x), np.array(data_y)
 
 
+def rmse(y_true, y_pred):
+    return backend.sqrt(backend.mean(backend.square(y_pred - y_true), axis=-1))
+
+
+def mape(y_true, y_pred):
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+
+
 def main():
     #####################################
     # Stock price prediction using LSTM #
@@ -110,8 +119,6 @@ def main():
     train = scaled_data[0:train_size]
     test = scaled_data[train_size - test_size:train_size]
 
-    # x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], 1)
-    # x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], 1)
 
     ##################################
     # Build and train the LSTM model #
@@ -122,7 +129,7 @@ def main():
     ]
 
     lstm_model = keras.models.load_model("models/lstm_model.h5")
-    # lstm_model = create_lstm_model(train)
+    # lstm_model = create_lstm_model(train, metrics)
     # lstm_model.save("models/lstm_model.h5")
 
     #############################
@@ -140,30 +147,35 @@ def main():
     #############################
     # Plot the results #
     #############################
-    # Plot the results
-    # plot_stock_trend(x[train_size:], train, symbol)
-    # plot_stock_trend(x[train_size:], train_predict, symbol)
-    # plot_stock_trend(x[train_size:], test, symbol)
-    # plot_stock_trend(x[train_size:], test_predict, symbol)
+    plt.plot(train, color='red', label='Train')
+    plt.plot(test, color='blue', label='Test')
+    plt.plot(train_predict, color='green', label='Train Prediction')
+    plt.plot(test_predict, color='black', label='Test Prediction')
+    plt.legend(loc='best')
+    plt.show()
 
-    # Matriz de confusion
-    print(confusion_matrix(test, test_predict))
-
-    #############################
-    # Evaluate the model #
-    #############################
-    # Evaluate the model
-    # print("\n\nEvaluate the model")
-    # print("\nTrain set:")
-    # metrics.evaluate_model(train, train_predict, metrics)
-    # print("\nTest set:")
-    # metrics.evaluate_model(test, test_predict, metrics)
-
-    # Observa la medida macro-f1 del siguiente informe
-    print(classification_report(test, test_predict, zero_division=0))
+    #########################
+    # Calculate the metrics #
+    #########################
+    rmse_train = rmse(train, train_predict)
+    rmse_test = rmse(test, test_predict)
+    mape_train = mape(train, train_predict)
+    mape_test = mape(test, test_predict)
 
 
-def create_lstm_model(train):
+    print("RMSE train: " + str(rmse_train))
+    print("RMSE test: " + str(rmse_test))
+
+    print("MAPE train: " + str(mape_train))
+    print("MAPE test: " + str(mape_test))
+
+    ####################
+    # Save the results #
+    ####################
+    lstm_model.summary()
+
+
+def create_lstm_model(train, metrics):
     lstm_model = Sequential()
     # First layer
     lstm_model.add(LSTM(units=50, return_sequences=True, input_shape=(train.shape[1], 1)))
