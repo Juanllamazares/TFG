@@ -111,7 +111,7 @@ def stock_prediction_LSTM(symbol: str = "AAPL", days: str = "full", plot: bool =
         keras.metrics.RootMeanSquaredError(name="oot_mean_squared_error"),  # RMSE
         keras.metrics.MeanAbsolutePercentageError(name="mean_absolute_percentage_error"),  # MAPE
     ]
-    
+
     if new_model:
         lstm_model = create_lstm_model(train, metrics)
         lstm_model.save("models/lstm_model.h5")
@@ -149,6 +149,8 @@ def stock_prediction_LSTM(symbol: str = "AAPL", days: str = "full", plot: bool =
     # Save the results #
     ####################
     lstm_model.summary()
+
+    return rmse_train, rmse_test, mape_train, mape_test
 
 
 def plot_results(test_predict, train_predict, x, y):
