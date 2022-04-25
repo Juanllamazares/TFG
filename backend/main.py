@@ -1,3 +1,5 @@
+import os.path
+
 import keras
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
@@ -15,38 +17,35 @@ from keras import backend
 API_KEY = "KW8CD0CRFLR2LKS0"
 
 
-def get_stock_price(symbol: str):
-    url = 'https://www.alphavantage.co/query'
-    params = {"function": "TIME_SERIES_DAILY", "symbol": symbol, "apikey": API_KEY, "outputsize": "compact"}
-    try:
-        r = requests.get(url, params=params)
-    except requests.exceptions.HTTPError as err:
-        raise SystemExit(err)
-
-    data = r.json()
-    return data["Time Series (Daily)"]
-
-
-def store_stock_price(dataset, symbol):
-    csv_columns = ["date", "close_price"]
-    with open(str(symbol) + '.csv', 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
-        writer.writeheader()
-        for data in dataset.values():
-            writer.writerow(data)
-
-
-def read_stock_price(symbol):
+def get_stock_price(symbol):
     dataset = {}
-    with open(str(symbol) + '.csv', newline='') as csvfile:
-        reader = csv.reader(csvfile)
-        next(reader)  # pass header
-        try:
+    file_name = 'stock_' + str(symbol) + '.csv'
+    if os.path.exists(file_name):
+        with open(str(symbol) + '.csv', 'r') as csvfile:
+            reader = csv.DictReader(csvfile)
             for row in reader:
-                dataset[row[0]] = {"4. close": float(row[1])}
-        except ValueError:
-            print(row)
+                dataset[row["date"]] = row["close_price"]
+    else:
+        url = 'https://www.alphavantage.co/query'
+        params = {"function": "TIME_SERIES_DAILY", "symbol": symbol, "apikey": API_KEY, "outputsize": "compact"}
+        try:
+            r = requests.get(url, params=params)
+        except requests.exceptions.HTTPError as err:
+            raise SystemExit(err)
+
+        data = r.json()
+        for key, value in data["Time Series (Daily)"].items():
+            dataset[key] = value["4. close"]
+
+        csv_columns = ["date", "close_price"]
+        with open(file_name, 'w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+            writer.writeheader()
+            for key, value in dataset.items():
+                writer.writerow({"date": key, "close_price": value})
+
     return dataset
+
 
 def create_dataset(dataset):
     data_x = []
@@ -77,15 +76,8 @@ def stock_prediction_LSTM(symbol: str = "AAPL", days: str = "full", plot: bool =
     # Data extraction #
     ###################
     symbol = "AAPL"
-    # data = get_stock_price(symbol)
-    # test = {}
-    # idx = 0
-    # for key, value in data.items():
-    #     test[idx] = {"date": key, "close_price": value["4. close"]}
-    #     idx += 1
-    #
-    # store_stock_price(test, symbol)
-    data = read_stock_price(symbol)
+
+    data = get_stock_price(symbol)
     # Train and test split
     test_ratio = 0.2
     training_ratio = 1 - test_ratio
