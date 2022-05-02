@@ -1,16 +1,15 @@
 import os.path
 
 import keras
-from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
-
+from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import csv
 import requests
+import math
 from sklearn.preprocessing import MinMaxScaler
 from keras import backend
 
@@ -88,11 +87,10 @@ def stock_prediction_LSTM(symbol: str = "AAPL", days: str = "full", plot: bool =
     ######################
     # Data preprocessing #
     ######################
-    x, y = create_dataset(data)
-    new_data = pd.DataFrame(index=range(0, len(data)), columns=['date', 'close'])
+    date_list, price_list = create_dataset(data)
     # Normalize data
     scaler = MinMaxScaler(feature_range=(0, 1))
-    scaled_data = scaler.fit_transform(y.reshape(-1, 1))
+    scaled_data = scaler.fit_transform(price_list.reshape(-1, 1))
     # Create training and test data
     train = scaled_data[0:train_size]
     test = scaled_data[train_size - test_size:train_size]
@@ -115,20 +113,14 @@ def stock_prediction_LSTM(symbol: str = "AAPL", days: str = "full", plot: bool =
     #############################
     train_predict = lstm_model.predict(train)
     test_predict = lstm_model.predict(test)
-    # Invert scaling for forecast
-    train_predict = scaler.inverse_transform(train_predict)
-    train = scaler.inverse_transform(train)
-    test_predict = scaler.inverse_transform(test_predict)
-    test = scaler.inverse_transform(test)
-    #############################
-    # Plot the results #
-    #############################
-    if plot:
-        plot_results(test_predict, train_predict, x, y)
 
     #########################
     # Calculate the metrics #
-    #########################
+    # #########################
+    # MSE = mean_squared_error(train, train_predict)
+    # rmse = math.sqrt(MSE)
+    # print("RMSE: " + str(rmse))
+
     rmse_train = rmse(train, train_predict)
     rmse_test = rmse(test, test_predict)
     mape_train = mape(train, train_predict)
@@ -137,6 +129,19 @@ def stock_prediction_LSTM(symbol: str = "AAPL", days: str = "full", plot: bool =
     print("RMSE test: " + str(rmse_test))
     print("MAPE train: " + str(mape_train))
     print("MAPE test: " + str(mape_test))
+
+
+    # Invert scaling for forecast
+    train_predict = scaler.inverse_transform(train_predict)
+    test_predict = scaler.inverse_transform(test_predict)
+    test = scaler.inverse_transform(test)
+    #############################
+    # Plot the results #
+    #############################
+    if plot:
+        plot_results(test_predict, train_predict, date_list, price_list)
+
+
     ####################
     # Save the results #
     ####################
@@ -163,7 +168,7 @@ def plot_results(test_predict, train_predict, x, y):
     # plt.plot(test_predict, color='black', label='Test Prediction')
     # plt.legend(loc='best')
     # plt.show()
-    plt.plot(x, y, color='red', label='Actual stock price')
+    plt.plot(x, y, color='red', label='Train')
     plt.plot(x[:len(train_predict)], train_predict.flatten(), color='green', label='Predicted stock price')
     plt.plot(x[len(train_predict):], test_predict.flatten(), color='black', label='Predicted stock price')
     plt.title("Prediction of Stock Price")
@@ -178,7 +183,6 @@ def create_lstm_model(train, metrics):
     lstm_model = Sequential()
     # First layer
     lstm_model.add(LSTM(units=50, return_sequences=True, input_shape=(train.shape[1], 1)))
-    # lstm_model.add(LSTM(units=50, return_sequences=True, input_shape=(train, 1)))
     # Second layer
     lstm_model.add(LSTM(units=50))
     lstm_model.add(Dense(1))
@@ -190,7 +194,7 @@ def create_lstm_model(train, metrics):
 
 
 def main():
-    stock_prediction_LSTM()
+    stock_prediction_LSTM(plot=True)
 
 
 if __name__ == "__main__":

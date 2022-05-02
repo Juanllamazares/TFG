@@ -17,21 +17,17 @@
 
     {% include "component/chart.html" %}
     <div>
-        <p>LSTM model (Sequential model)</p>
-        <p>RMSE: {{ rmse_value }}</p>
-        <p>MAPE: {{ mape_value  }}%</p>
+        <h4><u>LSTM model (Sequential model)</u></h4>
+        <p><b>Root Mean Square Error (RMSE):</b> {{ rmse_value }}%</p>
+        <p><b>Mean Square Error (MAPE):</b> {{ mape_value  }}%</p>
     </div>
 
     <div>
-        <p>Momentum</p>
-        <p>RMSE: {{ rmse_value }}</p>
-        <p>MAPE: {{ mape_value  }}%</p>
+        <h4><u>Momentum</u></h4>
     </div>
 
     <div>
-        <p>Fear and greed</p>
-        <p>RMSE: {{ rmse_value }}</p>
-        <p>MAPE: {{ mape_value  }}%</p>
+        <h4><u>Fear and greed</u></h4>
     </div>
 
     {% endif %}
