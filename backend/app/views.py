@@ -16,15 +16,18 @@ def dashboard(request):
     context_dict = {}
     if request.method == 'POST':
         symbol = request.POST.get("symbol")
+
         data = main.get_stock_price(symbol)
 
         date_list = list(data.keys())
-        close_price_list = []
-        for key, values in data.items():
-            close_price_list.append(values["4. close"])
-
+        close_price_list = list(data.values())
         date_list.reverse()
         close_price_list.reverse()
+
+        results = main.stock_prediction_LSTM(symbol)
+
+        print(results)
+
         stock_dict = {
             "symbol": symbol,
             "labels": json.dumps(date_list),
@@ -34,7 +37,7 @@ def dashboard(request):
         context_dict = {
             "full_view": True,
             "rmse_value": 10.2,
-            "mape_value": 3,
+            "mape_value": round(results["mape_train"], 2),
             "stock": stock_dict,
             "labels": json.dumps(date_list)
         }

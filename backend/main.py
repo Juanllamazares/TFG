@@ -24,7 +24,7 @@ def get_stock_price(symbol):
         with open(str(symbol) + '.csv', 'r') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
-                dataset[row["date"]] = row["close_price"]
+                dataset[row["date"]] = float(row["close_price"])
     else:
         url = 'https://www.alphavantage.co/query'
         params = {"function": "TIME_SERIES_DAILY", "symbol": symbol, "apikey": API_KEY, "outputsize": "compact"}
@@ -52,7 +52,7 @@ def create_dataset(dataset):
     data_y = []
     for key, values in dataset.items():
         data_x.append(key)
-        data_y.append(values["4. close"])
+        data_y.append(values)
 
     return np.array(data_x), np.array(data_y)
 
@@ -100,8 +100,8 @@ def stock_prediction_LSTM(symbol: str = "AAPL", days: str = "full", plot: bool =
     # Build and train the LSTM model #
     ##################################
     metrics = [
-        keras.metrics.RootMeanSquaredError(name="oot_mean_squared_error"),  # RMSE
-        keras.metrics.MeanAbsolutePercentageError(name="mean_absolute_percentage_error"),  # MAPE
+        keras.metrics.RootMeanSquaredError(name="RMSE"),  # RMSE
+        keras.metrics.MeanAbsolutePercentageError(name="MAPE"),  # MAPE
     ]
 
     if new_model:
@@ -142,7 +142,18 @@ def stock_prediction_LSTM(symbol: str = "AAPL", days: str = "full", plot: bool =
     ####################
     lstm_model.summary()
 
-    return rmse_train, rmse_test, mape_train, mape_test
+    ret = lstm_model.evaluate(test, test_predict)
+    print(ret)
+
+    results = {
+        "rmse_train": rmse_train,
+        "rmse_test": rmse_test,
+        "mape_train": mape_train,
+        "mape_test": mape_test,
+        "model": lstm_model
+    }
+
+    return results
 
 
 def plot_results(test_predict, train_predict, x, y):

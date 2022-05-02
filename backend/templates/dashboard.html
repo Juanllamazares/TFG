@@ -17,8 +17,21 @@
 
     {% include "component/chart.html" %}
     <div>
+        <p>LSTM model (Sequential model)</p>
         <p>RMSE: {{ rmse_value }}</p>
-        <p>MAPE: {{ mape_value }}%</p>
+        <p>MAPE: {{ mape_value  }}%</p>
+    </div>
+
+    <div>
+        <p>Momentum</p>
+        <p>RMSE: {{ rmse_value }}</p>
+        <p>MAPE: {{ mape_value  }}%</p>
+    </div>
+
+    <div>
+        <p>Fear and greed</p>
+        <p>RMSE: {{ rmse_value }}</p>
+        <p>MAPE: {{ mape_value  }}%</p>
     </div>
 
     {% endif %}
