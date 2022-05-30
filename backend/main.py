@@ -53,6 +53,8 @@ def create_dataset(dataset):
         data_x.append(key)
         data_y.append(values)
 
+    data_x.reverse()
+    data_y.reverse()
     return np.array(data_x), np.array(data_y)
 
 
@@ -74,7 +76,6 @@ def stock_prediction_LSTM(symbol: str = "AAPL", days: str = "full", plot: bool =
     ###################
     # Data extraction #
     ###################
-    symbol = "AAPL"
 
     data = get_stock_price(symbol)
     # Train and test split
