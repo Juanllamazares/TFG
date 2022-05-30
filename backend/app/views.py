@@ -3,6 +3,7 @@ import json
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 import main
+import auth
 
 
 # Create your views here.
@@ -48,11 +49,21 @@ def dashboard(request):
 
 def login(request):
     context_dict = {}
+    if request.method == 'POST':
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        auth.login(email, password)
+
     return render(request, 'login.html', context=context_dict)
 
 
 def sign_up(request):
     context_dict = {}
+    if request.method == 'POST':
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        auth.sign_up(email, password)
+
     return render(request, 'signup.html', context=context_dict)
 
 

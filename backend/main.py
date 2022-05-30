@@ -20,7 +20,7 @@ def get_stock_price(symbol):
     dataset = {}
     file_name = 'stock_' + str(symbol) + '.csv'
     if os.path.exists(file_name):
-        with open(str(symbol) + '.csv', 'r') as csvfile:
+        with open(file_name, 'r') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 dataset[row["date"]] = float(row["close_price"])
