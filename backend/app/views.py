@@ -24,8 +24,7 @@ def dashboard(request):
         close_price_list = list(data.values())
         date_list.reverse()
         close_price_list.reverse()
-
-        results = main.stock_prediction_LSTM(symbol)
+        results = main.stock_prediction_lstm(symbol)
 
         print(results)
 
