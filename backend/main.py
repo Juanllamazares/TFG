@@ -16,7 +16,7 @@ from keras import backend
 API_KEY = "KW8CD0CRFLR2LKS0"
 
 
-def get_stock_price(symbol):
+def get_stock_price(symbol, days="compact"):
     dataset = {}
     file_name = 'stock_' + str(symbol) + '.csv'
     if os.path.exists(file_name):
@@ -26,7 +26,7 @@ def get_stock_price(symbol):
                 dataset[row["date"]] = float(row["close_price"])
     else:
         url = 'https://www.alphavantage.co/query'
-        params = {"function": "TIME_SERIES_DAILY", "symbol": symbol, "apikey": API_KEY, "outputsize": "compact"}
+        params = {"function": "TIME_SERIES_DAILY", "symbol": symbol, "apikey": API_KEY, "outputsize": days}
         try:
             r = requests.get(url, params=params)
         except requests.exceptions.HTTPError as err:
@@ -77,7 +77,7 @@ def stock_prediction_LSTM(symbol: str = "AAPL", days: str = "full", plot: bool =
     # Data extraction #
     ###################
 
-    data = get_stock_price(symbol)
+    data = get_stock_price(symbol, days)
     # Train and test split
     test_ratio = 0.2
     training_ratio = 1 - test_ratio
@@ -151,12 +151,16 @@ def stock_prediction_LSTM(symbol: str = "AAPL", days: str = "full", plot: bool =
     ret = lstm_model.evaluate(test, test_predict)
     print(ret)
 
+    predicted_data = np.concatenate((train_predict, test_predict), axis=0)
+    predicted_data = predicted_data.tolist()
+
     results = {
         "rmse_train": rmse_train,
         "rmse_test": rmse_test,
         "mape_train": mape_train,
         "mape_test": mape_test,
-        "model": lstm_model
+        "model": lstm_model,
+        "predicted_data": predicted_data,
     }
 
     return results

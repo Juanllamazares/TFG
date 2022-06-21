@@ -32,7 +32,8 @@ def dashboard(request):
         stock_dict = {
             "symbol": symbol,
             "labels": json.dumps(date_list),
-            "data": json.dumps(close_price_list)
+            "data": json.dumps(close_price_list),
+            "predicted_data": json.dumps(results["predicted_data"])
         }
 
         context_dict = {

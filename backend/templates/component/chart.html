@@ -9,12 +9,20 @@
         type: 'line',
         data: {
             labels: {{ stock.labels | safe}},
-            datasets: [{
+            datasets: [
+                {
                 data: {{ stock.data | safe}},
                 label: "Actual stock price",
                 borderColor: "#3e95cd",
                 fill: false
-            }]
+            },
+            {
+                data: {{ stock.predicted_data | safe}},
+                label: "Predicted stock price",
+                borderColor: "#8e5ea2",
+                fill: false
+            }
+            ]
         },
         options: {
             plugins:{
