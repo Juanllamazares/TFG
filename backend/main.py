@@ -26,7 +26,7 @@ def get_stock_price(symbol):
                 dataset[row["date"]] = float(row["close_price"])
     else:
         url = 'https://www.alphavantage.co/query'
-        params = {"function": "TIME_SERIES_DAILY", "symbol": symbol, "apikey": API_KEY, "outputsize": "full"}
+        params = {"function": "TIME_SERIES_DAILY", "symbol": symbol, "apikey": API_KEY, "outputsize": "compact"}
         try:
             r = requests.get(url, params=params)
         except requests.exceptions.HTTPError as err:
@@ -107,7 +107,7 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
 
     if new_model:
         lstm_model = create_lstm_model(train, metrics)
-        lstm_model.save("models/lstm_model.h5")
+        lstm_model.save("models/lstm_model_"+symbol+".h5")
     else:
         lstm_model = keras.models.load_model("models/lstm_model.h5")
 

@@ -7,3 +7,7 @@ run:
 
 migrations:
 	python3 backend/manage.py runserver
+
+
+generate_models:
+	python3 backend/main.py
