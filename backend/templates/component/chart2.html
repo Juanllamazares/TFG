@@ -1,11 +1,11 @@
 <div>
     <div id="container" style="width: 75%;">
-        <canvas id="line-chart-1" width="800" height="450"></canvas>
+        <canvas id="line-chart-2" width="800" height="450"></canvas>
     </div>
 </div>
 {% block javascript %}
 <script>
-    new Chart(document.getElementById("line-chart-1"), {
+    new Chart(document.getElementById("line-chart-2"), {
         type: 'line',
         data: {
             labels: {{ stock.labels | safe}},

@@ -19,14 +19,15 @@ API_KEY = "KW8CD0CRFLR2LKS0"
 def get_stock_price(symbol):
     dataset = {}
     file_name = 'stock_' + str(symbol) + '.csv'
-    if os.path.exists(file_name):
-        with open(file_name, 'r') as csvfile:
+    file_path = 'backend/data/' + file_name
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 dataset[row["date"]] = float(row["close_price"])
     else:
         url = 'https://www.alphavantage.co/query'
-        params = {"function": "TIME_SERIES_DAILY", "symbol": symbol, "apikey": API_KEY, "outputsize": "compact"}
+        params = {"function": "TIME_SERIES_DAILY", "symbol": symbol, "apikey": API_KEY, "outputsize": "full"}
         try:
             r = requests.get(url, params=params)
         except requests.exceptions.HTTPError as err:
@@ -37,7 +38,7 @@ def get_stock_price(symbol):
             dataset[key] = value["4. close"]
 
         csv_columns = ["date", "close_price"]
-        with open(file_name, 'w', newline='') as csvfile:
+        with open(file_path, 'w', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
             writer.writeheader()
             for key, value in dataset.items():
@@ -104,12 +105,14 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
         keras.metrics.RootMeanSquaredError(name="RMSE"),  # RMSE
         keras.metrics.MeanAbsolutePercentageError(name="MAPE"),  # MAPE
     ]
-
     if new_model:
         lstm_model = create_lstm_model(train, metrics)
         lstm_model.save("models/lstm_model_"+symbol+".h5")
     else:
-        lstm_model = keras.models.load_model("models/lstm_model.h5")
+        try:
+            lstm_model = keras.models.load_model("models/lstm_model_"+symbol+".h5")
+        except:
+            print("[ERROR] No model found")
 
     #############################
     # Make predictions and test #
