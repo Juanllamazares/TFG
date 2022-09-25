@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block body %}
 <div class="container">
-    <div class="justify-content-center">
+    <div class="mt-4 justify-content-center">
         <h1>Stock prediction using LSTM model</h1>
-        <p >Write the name of the stock you want to search</p>
+        <p>Write the name of the stock you want to search</p>
     </div>
 
     <div class="d-flex justify-content-center">
@@ -35,29 +35,33 @@
     </div>
 
     {% if full_view %}
-    <div>
-        <h4><u>LSTM model (Sequential model)</u></h4>
-        <p><b>Description:</b><br>Test: 20%<br>Train: 80%</p>
-        <p><b>Root Mean Square Error (RMSE):</b> {{ rmse_value }}%</p>
-        <p><b>Mean Square Error (MAPE):</b> {{ mape_value  }}%</p>
-    </div>
+    <section class="mt-5">
+        <div>
+            <h4><u>LSTM model (Sequential model)</u></h4>
+            <p><b>Description:</b><br>Test: 20%<br>Train: 80%</p>
+            <p><b>Root Mean Square Error (RMSE):</b> {{ rmse_value }}%</p>
+            <p><b>Mean Square Error (MAPE):</b> {{ mape_value }}%</p>
+        </div>
 
-    <h2>Predicting one day into the future [{{first_date}} - {{last_date}}]</h2>
-    {% include "component/chart.html" %}
-    <br>
-    <h2>Predicting next days [{{first_date}} - {{last_date}}]</h2>
-    {% include "component/chart2.html" %}
+        <h2>Predicting one day into the future [{{first_date}} - {{last_date}}]</h2>
+        <p><b>Definition:</b></p>
+
+        {% include "component/chart.html" %}
+        <br>
+        <h2>Predicting next days [{{first_date}} - {{last_date}}]</h2>
+        <p><b>Definition:</b> That is, prediction will predict future day based on previous data. </p>
+        {% include "component/chart2.html" %}
 
 
+        <!--        <div>-->
+        <!--            <h4><u>Momentum</u></h4>-->
+        <!--        </div>-->
 
-    <div>
-        <h4><u>Momentum</u></h4>
-    </div>
+        <!--        <div>-->
+        <!--            <h4><u>Fear and greed</u></h4>-->
+        <!--        </div>-->
 
-    <div>
-        <h4><u>Fear and greed</u></h4>
-    </div>
-
+    </section>
     {% endif %}
 </div>
 

@@ -107,10 +107,10 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     ]
     if new_model:
         lstm_model = create_lstm_model(train, metrics)
-        lstm_model.save("models/lstm_model_"+symbol+".h5")
+        lstm_model.save("models/lstm_model_" + symbol + ".h5")
     else:
         try:
-            lstm_model = keras.models.load_model("models/lstm_model_"+symbol+".h5")
+            lstm_model = keras.models.load_model("models/lstm_model_" + symbol + ".h5")
         except:
             print("[ERROR] No model found")
 
@@ -208,12 +208,20 @@ def create_lstm_model(train, metrics):
     # Compiling the RNN (Recurrent Neuronal Network)
     lstm_model.compile(optimizer="adam", loss='mean_squared_error', metrics=metrics)
     # Fitting the RNN to the Training set
-    lstm_model.fit(train, train, epochs=100, batch_size=1, verbose=2)
+    lstm_model.fit(train, train, epochs=25, batch_size=32, verbose=2)
     return lstm_model
+
+
+def generate_all_predictions():
+    n_days = 365
+    stock_list = ['AAPL', 'MSFT', 'AMZN', 'TSLA', 'GOOGL']
+    for stock in stock_list:
+        stock_prediction_lstm(plot=False, new_model=True, symbol=stock, n_days=n_days)
 
 
 def main():
     stock_prediction_lstm(plot=True, new_model=True)
+    # generate_all_predictions()
 
 
 if __name__ == "__main__":
