@@ -104,15 +104,31 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     metrics = [
         keras.metrics.RootMeanSquaredError(name="RMSE"),  # RMSE
         keras.metrics.MeanAbsolutePercentageError(name="MAPE"),  # MAPE
+
     ]
-    if new_model:
-        lstm_model = create_lstm_model(train, metrics)
-        lstm_model.save("models/lstm_model_" + symbol + ".h5")
-    else:
-        try:
+
+    history = None
+    try:
+        if new_model:
+            lstm_model, history = create_lstm_model(train, metrics)
+            lstm_model.save("models/lstm_model_" + symbol + ".h5")
+        else:
             lstm_model = keras.models.load_model("models/lstm_model_" + symbol + ".h5")
-        except:
-            print("[ERROR] No model found")
+    except:
+        print("[ERROR] Creating/Reading model")
+
+    ###################
+    # Plot loss chart #
+    # #################
+    if plot and history is not None:
+        plt.plot(history.epoch, history.history['loss'], label='Train loss')
+        plt.title("Loss graph")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.legend(loc='best')
+        plt.show()
+
+
 
     #############################
     # Make predictions and test #
@@ -137,6 +153,7 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     # Invert scaling for forecast
     train_predict = scaler.inverse_transform(train_predict)
     test_predict = scaler.inverse_transform(test_predict)
+    test_predict = test_predict[::-1]
     test = scaler.inverse_transform(test)
     #############################
     # Plot the results #
@@ -168,12 +185,14 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     return results
 
 
-def plot_predicted_data(test_predict, train_predict, x, y):
-    plt.plot(x, y, color='red', label='Train')
-    plt.plot(x[:len(train_predict)], train_predict.flatten(), color='green', label='Predicted stock price')
-    plt.plot(x[len(train_predict):], test_predict.flatten(), color='black', label='Predicted stock price')
-    plt.title("Prediction of Stock Price")
-    plt.xticks(np.arange(0, 100, 10))
+def plot_predicted_data(test_predict, train_predict, date_list, price_list):
+    plt.plot(date_list, price_list, color='blue', label='Real stock price data')
+    plt.plot(date_list[:len(train_predict)], train_predict.flatten(), color='green', label='Train')
+    plt.plot(date_list[len(train_predict):], test_predict.flatten(), color='black', label='Prediction')
+    plt.title("Stock Price Prediction")
+    plt.gcf().autofmt_xdate()
+    plt.xlabel("Date")
+    plt.xticks(np.arange(0, len(date_list), 50), date_list[::50], rotation=45)
     plt.xlabel("Date")
     plt.ylabel("Stock Price")
     plt.legend(loc='best')
@@ -208,8 +227,8 @@ def create_lstm_model(train, metrics):
     # Compiling the RNN (Recurrent Neuronal Network)
     lstm_model.compile(optimizer="adam", loss='mean_squared_error', metrics=metrics)
     # Fitting the RNN to the Training set
-    lstm_model.fit(train, train, epochs=25, batch_size=32, verbose=2)
-    return lstm_model
+    history = lstm_model.fit(train, train, epochs=100, batch_size=32, verbose=2)
+    return lstm_model, history
 
 
 def generate_all_predictions():
@@ -220,7 +239,7 @@ def generate_all_predictions():
 
 
 def main():
-    stock_prediction_lstm(plot=True, new_model=True)
+    stock_prediction_lstm(plot=True, new_model=False)
     # generate_all_predictions()
 
 
