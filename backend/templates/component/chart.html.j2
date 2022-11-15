@@ -11,33 +11,42 @@
             labels: {{ stock.labels | safe}},
             datasets: [
                 {
-                data: {{ stock.data | safe}},
-                label: "Actual stock price",
-                borderColor: "#3e95cd",
-                fill: false
-            },
-            {
-                data: {{ stock.predicted_data | safe}},
-                label: "Predicted stock price",
-                borderColor: "#8e5ea2",
-                fill: false
-            }
+                    data: {{ stock.data | safe}},
+                    label: "Actual stock price",
+                    borderColor: "#3e95cd",
+                    fill: false
+                },
+                {
+                    data: {{ stock.predicted_data | safe}},
+                    label: "Predicted stock price",
+                    borderColor: "#8e5ea2",
+                    fill: false
+                }
             ]
         },
         options: {
-            plugins:{
+            responsive: true,
+            interaction: {
+                intersect: false,
+            },
+            plugins: {
                 legend: {
                     display: true
                 },
                 tooltips: {
-                    enabled: false
+                    titleFont: {
+                        size: 40
+                    },
+                    bodyFont: {
+                        size: 40
+                    },
                 }
             },
             elements: {
-                    point:{
-                        radius: 0
-                    }
-                },
+                point: {
+                    radius: 0
+                }
+            },
             scales: {
                 yAxes: [{
                     scaleLabel: {

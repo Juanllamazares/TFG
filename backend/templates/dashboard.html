@@ -46,11 +46,12 @@
         <h2>Predicting one day into the future [{{first_date}} - {{last_date}}]</h2>
         <p><b>Definition:</b></p>
 
-        {% include "component/chart.html" %}
+        <p><b>Close:</b> The closing price is the last price at which a stock trades during a regular trading session. It is the price at which a trader can close out an existing long or short position.</p>
+        {% include "component/chart.html.j2" %}
         <br>
         <h2>Predicting next days [{{first_date}} - {{last_date}}]</h2>
         <p><b>Definition:</b> That is, prediction will predict future day based on previous data. </p>
-        {% include "component/chart2.html" %}
+        {% include "component/chart2.html.j2" %}
 
 
         <!--        <div>-->

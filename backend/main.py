@@ -1,6 +1,7 @@
 import os.path
 
 import keras
+import json
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
@@ -74,7 +75,7 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     #####################################
     # Stock price prediction using LSTM #
     #####################################
-    # Author: Juan Llamazares
+    # Author: Juan Llamazares Ruiz
 
     ###################
     # Data extraction #
@@ -102,32 +103,41 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     # Build and train the LSTM model #
     ##################################
     metrics = [
-        keras.metrics.RootMeanSquaredError(name="RMSE"),  # RMSE
-        keras.metrics.MeanAbsolutePercentageError(name="MAPE"),  # MAPE
+        keras.metrics.RootMeanSquaredError(),  # RMSE
+        keras.metrics.MeanAbsolutePercentageError(),  # MAPE
 
     ]
 
-    history = None
+    history = history_dict = None
     try:
         if new_model:
             lstm_model, history = create_lstm_model(train, metrics)
             lstm_model.save("models/lstm_model_" + symbol + ".h5")
+            history_dict = history.history
+            json.dump(history_dict, open("models/lstm_model_" + symbol + "_history.json", "w"))
         else:
             lstm_model = keras.models.load_model("models/lstm_model_" + symbol + ".h5")
+            history_dict = json.load(open("models/lstm_model_" + symbol + "_history.json", "r"))
     except:
         print("[ERROR] Creating/Reading model")
 
     ###################
     # Plot loss chart #
     # #################
-    if plot and history is not None:
-        plt.plot(history.epoch, history.history['loss'], label='Train loss')
-        plt.title("Loss graph")
-        plt.xlabel("Epoch")
-        plt.ylabel("Loss")
-        plt.legend(loc='best')
-        plt.show()
+    if plot and history_dict is not None:
+        loss_values = history_dict['loss']
+        epochs = range(1, len(loss_values) + 1)
+        mape_values = history_dict['mean_absolute_percentage_error']
+        rmse_values = history_dict['root_mean_squared_error']
+        plt.plot(epochs, loss_values, 'bo', label='Training loss')
+        plt.plot(epochs, mape_values, 'b', label='MAPE')
+        plt.plot(epochs, rmse_values, 'r', label='RMSE')
 
+        plt.title('Training loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.show()
 
 
     #############################
@@ -225,7 +235,7 @@ def create_lstm_model(train, metrics):
     lstm_model.add(LSTM(units=50))
     lstm_model.add(Dense(1))
     # Compiling the RNN (Recurrent Neuronal Network)
-    lstm_model.compile(optimizer="adam", loss='mean_squared_error', metrics=metrics)
+    lstm_model.compile(optimizer="adam", loss='mse', metrics=metrics)
     # Fitting the RNN to the Training set
     history = lstm_model.fit(train, train, epochs=100, batch_size=32, verbose=2)
     return lstm_model, history
