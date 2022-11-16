@@ -3,7 +3,7 @@ import os.path
 import keras
 import json
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, GRU
 from keras.layers import LSTM
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
@@ -240,6 +240,19 @@ def create_lstm_model(train, metrics):
     history = lstm_model.fit(train, train, epochs=100, batch_size=32, verbose=2)
     return lstm_model, history
 
+
+def create_gru_model(train, metrics):
+    gru_model = Sequential()
+    # First layer
+    gru_model.add(GRU(units=50, return_sequences=True, input_shape=(train.shape[1], 1)))
+    # Second layer
+    gru_model.add(GRU(units=50))
+    gru_model.add(Dense(1))
+    # Compiling the RNN (Recurrent Neuronal Network)
+    gru_model.compile(optimizer="adam", loss='mse', metrics=metrics)
+    # Fitting the RNN to the Training set
+    history = gru_model.fit(train, train, epochs=100, batch_size=32, verbose=2)
+    return gru_model, history
 
 def generate_all_predictions():
     n_days = 365
