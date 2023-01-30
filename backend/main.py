@@ -1,4 +1,5 @@
 import os.path
+from datetime import date, datetime
 
 import keras
 import json
@@ -116,8 +117,15 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
             history_dict = history.history
             json.dump(history_dict, open("models/lstm_model_" + symbol + "_history.json", "w"))
         else:
-            lstm_model = keras.models.load_model("models/lstm_model_" + symbol + ".h5")
-            history_dict = json.load(open("models/lstm_model_" + symbol + "_history.json", "r"))
+            try:
+                lstm_model = keras.models.load_model("models/lstm_model_" + symbol + ".h5")
+                history_dict = json.load(open("models/lstm_model_" + symbol + "_history.json", "r"))
+            except OSError:
+                lstm_model, history = create_lstm_model(train, metrics)
+                lstm_model.save("models/lstm_model_" + symbol + ".h5")
+                history_dict = history.history
+                json.dump(history_dict, open("models/lstm_model_" + symbol + "_history.json", "w"))
+
     except:
         print("[ERROR] Creating/Reading model")
 
@@ -138,7 +146,6 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
         plt.ylabel('Loss')
         plt.legend()
         plt.show()
-
 
     #############################
     # Make predictions and test #
@@ -169,8 +176,8 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     # Plot the results #
     #############################
     if plot:
-        plot_predicted_data(test_predict, train_predict, date_list, price_list)
-        plot_metric_results(rmse_train, rmse_test, mape_train, mape_test)
+        plot_predicted_data(test_predict, train_predict, date_list, price_list, symbol)
+        plot_metric_results(rmse_train, rmse_test, mape_train, mape_test, symbol)
 
     ####################
     # Save the results #
@@ -195,7 +202,7 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     return results
 
 
-def plot_predicted_data(test_predict, train_predict, date_list, price_list):
+def plot_predicted_data(test_predict, train_predict, date_list, price_list, symbol):
     plt.plot(date_list, price_list, color='blue', label='Real stock price data')
     plt.plot(date_list[:len(train_predict)], train_predict.flatten(), color='green', label='Train')
     plt.plot(date_list[len(train_predict):], test_predict.flatten(), color='black', label='Prediction')
@@ -206,16 +213,24 @@ def plot_predicted_data(test_predict, train_predict, date_list, price_list):
     plt.xlabel("Date")
     plt.ylabel("Stock Price")
     plt.legend(loc='best')
+    file_name = "RESULT_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol
+    if not os.path.exists("results/"+file_name+".png"):
+        plt.savefig("results/"+file_name+".png")
     plt.show()
 
 
-def plot_metric_results(rmse_train, rmse_test, mape_train, mape_test):
+def plot_metric_results(rmse_train, rmse_test, mape_train, mape_test, symbol):
     plt.plot(rmse_train, color='red', label='Train')
     plt.plot(rmse_test, color='black', label='Test')
     plt.title("RMSE")
     plt.xlabel("Epoch")
     plt.ylabel("RMSE")
     plt.legend(loc='best')
+    file_name = "RMSE_"+datetime.today().strftime('%d%m%Y_%H:%M')+"_"+symbol
+    if not os.path.exists("results/"+file_name+".png"):
+        plt.savefig("results/"+file_name+".png")
+    # else:
+    #     plt.savefig("results/"+file_name+"_.png")
     plt.show()
 
     plt.plot(mape_train, color='red', label='Train')
@@ -224,8 +239,9 @@ def plot_metric_results(rmse_train, rmse_test, mape_train, mape_test):
     plt.xlabel("Epoch")
     plt.ylabel("MAPE")
     plt.legend(loc='best')
+    file_name = "MAPE_"+datetime.today().strftime('%d%m%Y_%H:%M')+"_"+symbol
+    plt.savefig("results/"+file_name+".png")
     plt.show()
-
 
 def create_lstm_model(train, metrics):
     lstm_model = Sequential()
@@ -253,6 +269,7 @@ def create_gru_model(train, metrics):
     # Fitting the RNN to the Training set
     history = gru_model.fit(train, train, epochs=100, batch_size=32, verbose=2)
     return gru_model, history
+
 
 def generate_all_predictions():
     n_days = 365
