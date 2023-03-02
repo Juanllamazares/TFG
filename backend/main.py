@@ -18,10 +18,11 @@ from keras import backend
 API_KEY = "KW8CD0CRFLR2LKS0"
 
 
-def get_stock_price(symbol):
+def get_stock_price(symbol, new=False):
     dataset = {}
     file_name = 'stock_' + str(symbol) + '.csv'
     file_path = 'backend/data/' + file_name
+
     if os.path.exists(file_path):
         with open(file_path, 'r') as csvfile:
             reader = csv.DictReader(csvfile)
@@ -29,7 +30,7 @@ def get_stock_price(symbol):
                 dataset[row["date"]] = float(row["close_price"])
     else:
         url = 'https://www.alphavantage.co/query'
-        params = {"function": "TIME_SERIES_DAILY", "symbol": symbol, "apikey": API_KEY, "outputsize": "full"}
+        params = {"function": "TIME_SERIES_DAILY_ADJUSTED", "symbol": symbol, "apikey": API_KEY, "outputsize": "full"}
         try:
             r = requests.get(url, params=params)
         except requests.exceptions.HTTPError as err:
@@ -72,6 +73,22 @@ def mape(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 
+def plot_loss_chart(history_dict, param):
+    loss_values = history_dict['loss']
+    epochs = range(1, len(loss_values) + 1)
+    mape_values = history_dict['mean_absolute_percentage_error']
+    rmse_values = history_dict['root_mean_squared_error']
+    plt.plot(epochs, loss_values, 'bo', label='Training loss')
+    plt.plot(epochs, mape_values, 'b', label='MAPE')
+    plt.plot(epochs, rmse_values, 'r', label='RMSE')
+
+    plt.title('Training loss ' + param)
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.show()
+
+
 def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = False, new_model: bool = False):
     #####################################
     # Stock price prediction using LSTM #
@@ -109,22 +126,27 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
 
     ]
 
-    history = history_dict = None
+    history_lstm = history_gru = history_dict_lstm = history_dict_gru = None
     try:
         if new_model:
-            lstm_model, history = create_lstm_model(train, metrics)
+            lstm_model, history_lstm = create_lstm_model(train, metrics)
             lstm_model.save("models/lstm_model_" + symbol + ".h5")
-            history_dict = history.history
-            json.dump(history_dict, open("models/lstm_model_" + symbol + "_history.json", "w"))
+            history_dict_lstm = history_lstm.history
+            json.dump(history_dict_lstm, open("models/lstm_model_" + symbol + "_history.json", "w"))
+
+            gru_model, history_gru = create_gru_model(train, metrics)
+            gru_model.save("models/gru_model_" + symbol + ".h5")
+            history_dict_gru = history_gru.history
+            json.dump(history_dict_gru, open("models/gru_model_" + symbol + "_history.json", "w"))
         else:
             try:
                 lstm_model = keras.models.load_model("models/lstm_model_" + symbol + ".h5")
-                history_dict = json.load(open("models/lstm_model_" + symbol + "_history.json", "r"))
+                history_dict_lstm = json.load(open("models/lstm_model_" + symbol + "_history.json", "r"))
             except OSError:
                 lstm_model, history = create_lstm_model(train, metrics)
                 lstm_model.save("models/lstm_model_" + symbol + ".h5")
-                history_dict = history.history
-                json.dump(history_dict, open("models/lstm_model_" + symbol + "_history.json", "w"))
+                history_dict_lstm = history.history
+                json.dump(history_dict_lstm, open("models/lstm_model_" + symbol + "_history.json", "w"))
 
     except:
         print("[ERROR] Creating/Reading model")
@@ -132,20 +154,12 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     ###################
     # Plot loss chart #
     # #################
-    if plot and history_dict is not None:
-        loss_values = history_dict['loss']
-        epochs = range(1, len(loss_values) + 1)
-        mape_values = history_dict['mean_absolute_percentage_error']
-        rmse_values = history_dict['root_mean_squared_error']
-        plt.plot(epochs, loss_values, 'bo', label='Training loss')
-        plt.plot(epochs, mape_values, 'b', label='MAPE')
-        plt.plot(epochs, rmse_values, 'r', label='RMSE')
+    if plot:
+        if history_dict_lstm is not None:
+            plot_loss_chart(history_dict_lstm, "LSTM")
 
-        plt.title('Training loss')
-        plt.xlabel('Epochs')
-        plt.ylabel('Loss')
-        plt.legend()
-        plt.show()
+        if history_dict_gru is not None:
+            plot_loss_chart(history_dict_gru, "GRU")
 
     #############################
     # Make predictions and test #
@@ -167,6 +181,17 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     print("MAPE train: " + str(mape_train))
     print("MAPE test: " + str(mape_test))
 
+    # # Save metrics
+    # metrics_dict = {
+    #     "rmse_train": rmse_train,
+    #     "rmse_test": rmse_test,
+    #     "mape_train": mape_train,
+    #     "mape_test": mape_test
+    # }
+    # date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
+    # json.dump(metrics_dict, open("models/lstm_model_" + symbol + "_metrics.json", "w"))
+    #
+
     # Invert scaling for forecast
     train_predict = scaler.inverse_transform(train_predict)
     test_predict = scaler.inverse_transform(test_predict)
@@ -185,7 +210,7 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     lstm_model.summary()
 
     ret = lstm_model.evaluate(test, test_predict)
-    print(ret)
+    # print(ret)
 
     predicted_data = np.concatenate((train_predict, test_predict), axis=0)
     predicted_data = predicted_data.tolist()
@@ -214,23 +239,24 @@ def plot_predicted_data(test_predict, train_predict, date_list, price_list, symb
     plt.ylabel("Stock Price")
     plt.legend(loc='best')
     file_name = "RESULT_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol
-    if not os.path.exists("results/"+file_name+".png"):
-        plt.savefig("results/"+file_name+".png")
+    if not os.path.exists("results/" + file_name + ".png"):
+        plt.savefig("results/" + file_name + ".png")
     plt.show()
 
 
-def plot_metric_results(rmse_train, rmse_test, mape_train, mape_test, symbol):
+def plot_metric_results(rmse_train, rmse_test, mape_train, mape_test, symbol, save=False):
     plt.plot(rmse_train, color='red', label='Train')
     plt.plot(rmse_test, color='black', label='Test')
     plt.title("RMSE")
     plt.xlabel("Epoch")
     plt.ylabel("RMSE")
     plt.legend(loc='best')
-    file_name = "RMSE_"+datetime.today().strftime('%d%m%Y_%H:%M')+"_"+symbol
-    if not os.path.exists("results/"+file_name+".png"):
-        plt.savefig("results/"+file_name+".png")
-    # else:
-    #     plt.savefig("results/"+file_name+"_.png")
+    if save:
+        file_name = "RMSE_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol
+        if not os.path.exists("results/" + file_name + ".png"):
+            plt.savefig("results/" + file_name + ".png")
+        # else:
+        #     plt.savefig("results/"+file_name+"_.png")
     plt.show()
 
     plt.plot(mape_train, color='red', label='Train')
@@ -239,9 +265,20 @@ def plot_metric_results(rmse_train, rmse_test, mape_train, mape_test, symbol):
     plt.xlabel("Epoch")
     plt.ylabel("MAPE")
     plt.legend(loc='best')
-    file_name = "MAPE_"+datetime.today().strftime('%d%m%Y_%H:%M')+"_"+symbol
-    plt.savefig("results/"+file_name+".png")
+    if save:
+        file_name = "MAPE_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol
+        plt.savefig("results/" + file_name + ".png")
     plt.show()
+
+    if save:
+        file_name = "NUMERIC_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol
+        f = open("results/" + file_name + ".txt", "w")
+        f.write("RMSE train: " + str(rmse_train))
+        f.write("RMSE test: " + str(rmse_test))
+        f.write("MAPE train: " + str(mape_train))
+        f.write("MAPE test: " + str(mape_test))
+        f.close()
+
 
 def create_lstm_model(train, metrics):
     lstm_model = Sequential()
@@ -279,7 +316,7 @@ def generate_all_predictions():
 
 
 def main():
-    stock_prediction_lstm(plot=True, new_model=False)
+    stock_prediction_lstm(plot=True, new_model=True)
     # generate_all_predictions()
 
 

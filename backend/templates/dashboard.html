@@ -43,10 +43,10 @@
             <p><b>Mean Square Error (MAPE):</b> {{ mape_value }}%</p>
         </div>
 
-        <h2>Predicting one day into the future [{{first_date}} - {{last_date}}]</h2>
+        <h2>Predicting one day into the future (TRAIN vs TEST) [{{first_date}} - {{last_date}}]</h2>
         <p><b>Definition:</b></p>
 
-        <p><b>Close:</b> The closing price is the last price at which a stock trades during a regular trading session. It is the price at which a trader can close out an existing long or short position.</p>
+        <p><b>Close stock price:</b> The closing price is the last price at which a stock trades during a regular trading session. It is the price at which a trader can close out an existing long or short position.</p>
         {% include "component/chart.html.j2" %}
         <br>
         <h2>Predicting next days [{{first_date}} - {{last_date}}]</h2>
