@@ -91,7 +91,7 @@ def plot_loss_chart(history_dict, param):
 
 def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = False, new_model: bool = False):
     #####################################
-    # Stock price prediction using LSTM #
+    # Stock price prediction            #
     #####################################
     # Author: Juan Llamazares Ruiz
 
