@@ -312,12 +312,12 @@ def generate_all_predictions():
     n_days = 365
     stock_list = ['AAPL', 'MSFT', 'AMZN', 'TSLA', 'GOOGL']
     for stock in stock_list:
-        stock_prediction_lstm(plot=False, new_model=True, symbol=stock, n_days=n_days)
+        stock_prediction_lstm(plot=True, new_model=True, symbol=stock, n_days=n_days)
 
 
 def main():
-    stock_prediction_lstm(plot=True, new_model=True)
-    # generate_all_predictions()
+    # stock_prediction_lstm(plot=True, new_model=True)
+    generate_all_predictions()
 
 
 if __name__ == "__main__":

@@ -53,6 +53,11 @@ def dashboard(request):
     return render(request, 'dashboard.html', context=context_dict)
 
 
+def faq(request):
+    context_dict = {}
+    return render(request, 'faq.html', context=context_dict)
+
+
 def login(request):
     context_dict = {}
     if request.method == 'POST':

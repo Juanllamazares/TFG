@@ -5,9 +5,12 @@ all:
 run:
 	python3 backend/manage.py runserver
 
-migrations:
+migrate:
 	python3 backend/manage.py migrate
 
 
 generate_models:
 	python3 backend/main.py
+
+heroku:
+	git push heroku main    
