@@ -29,11 +29,15 @@ def dashboard(request):
         date_list = date_list[-n_days:]
         results = main.stock_prediction_lstm(symbol, n_days)
 
+        lstm_results = results['lstm']
+        gru_results = results['gru']
+
         stock_dict = {
             "symbol": symbol,
             "labels": json.dumps(date_list),
             "data": json.dumps(close_price_list),
-            "predicted_data": json.dumps(results["predicted_data"])
+            "predicted_data_lstm": json.dumps(lstm_results["predicted_data"]),
+            "predicted_data_gru": json.dumps(gru_results["predicted_data"])
         }
 
         first_date = datetime.datetime.strptime(date_list[0], '%Y-%m-%d')
@@ -42,7 +46,7 @@ def dashboard(request):
         context_dict = {
             "full_view": True,
             "rmse_value": 10.2,
-            "mape_value": round(results["mape_train"], 2),
+            "mape_value": round(lstm_results["mape_train"], 2),
             "stock": stock_dict,
             "labels": json.dumps(date_list),
             "first_date": first_date.strftime("%m/%Y"),

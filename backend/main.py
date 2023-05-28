@@ -89,6 +89,18 @@ def plot_loss_chart(history_dict, param):
     plt.show()
 
 
+def calculate_rmse(train, test, train_predict, test_predict):
+    rmse_train = rmse(train, train_predict)
+    rmse_test = rmse(test, test_predict)
+    return rmse_train, rmse_test
+
+
+def calculate_mape(train, test, train_predict, test_predict):
+    mape_train = mape(train, train_predict)
+    mape_test = mape(test, test_predict)
+    return mape_train, mape_test
+
+
 def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = False, new_model: bool = False):
     #####################################
     # Stock price prediction            #
@@ -123,10 +135,9 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     metrics = [
         keras.metrics.RootMeanSquaredError(),  # RMSE
         keras.metrics.MeanAbsolutePercentageError(),  # MAPE
-
     ]
 
-    history_lstm = history_gru = history_dict_lstm = history_dict_gru = None
+    history_lstm = history_gru = history_dict_lstm = history_dict_gru = lstm_model = gru_model = None
     try:
         if new_model:
             lstm_model, history_lstm = create_lstm_model(train, metrics)
@@ -142,6 +153,9 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
             try:
                 lstm_model = keras.models.load_model("models/lstm_model_" + symbol + ".h5")
                 history_dict_lstm = json.load(open("models/lstm_model_" + symbol + "_history.json", "r"))
+
+                gru_model = keras.models.load_model("models/gru_model_" + symbol + ".h5")
+                history_dict_gru = json.load(open("models/gru_model_" + symbol + "_history.json", "r"))
             except OSError:
                 lstm_model, history = create_lstm_model(train, metrics)
                 lstm_model.save("models/lstm_model_" + symbol + ".h5")
@@ -164,22 +178,26 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     #############################
     # Make predictions and test #
     #############################
-    train_predict = lstm_model.predict(train)
-    test_predict = lstm_model.predict(test)
+    train_predict_lstm = lstm_model.predict(train)
+    test_predict_lstm = lstm_model.predict(test)
+
+    train_predict_gru = gru_model.predict(train)
+    test_predict_gru = gru_model.predict(test)
 
     #########################
     # Calculate the metrics #
     # #########################
     # val_rmse = lstm_model.history[]
+    rmse_train_lstm, rmse_test_lstm = calculate_rmse(train, test, train_predict_lstm, test_predict_lstm)
+    mape_train_lstm, mape_test_lstm = calculate_mape(train, test, train_predict_lstm, test_predict_lstm)
 
-    rmse_train = rmse(train, train_predict)
-    rmse_test = rmse(test, test_predict)
-    mape_train = mape(train, train_predict)
-    mape_test = mape(test, test_predict)
-    print("RMSE train: " + str(rmse_train))
-    print("RMSE test: " + str(rmse_test))
-    print("MAPE train: " + str(mape_train))
-    print("MAPE test: " + str(mape_test))
+    rmse_train_gru, rmse_test_gru = calculate_rmse(train, test, train_predict_gru, test_predict_gru)
+    mape_train_gru, mape_test_gru = calculate_mape(train, test, train_predict_gru, test_predict_gru)
+
+    # print("RMSE train: " + str(rmse_train))
+    # print("RMSE test: " + str(rmse_test))
+    # print("MAPE train: " + str(mape_train))
+    # print("MAPE test: " + str(mape_test))
 
     # # Save metrics
     # metrics_dict = {
@@ -193,35 +211,55 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     #
 
     # Invert scaling for forecast
-    train_predict = scaler.inverse_transform(train_predict)
-    test_predict = scaler.inverse_transform(test_predict)
-    test_predict = test_predict[::-1]
+    train_predict_lstm = scaler.inverse_transform(train_predict_lstm)
+    test_predict_lstm = scaler.inverse_transform(test_predict_lstm)
+    test_predict_lstm = test_predict_lstm[::-1]
+    test = scaler.inverse_transform(test)
+
+    train_predict_gru = scaler.inverse_transform(train_predict_gru)
+    test_predict_gru = scaler.inverse_transform(test_predict_gru)
+    test_predict_gru = test_predict_gru[::-1]
     test = scaler.inverse_transform(test)
     #############################
     # Plot the results #
     #############################
     if plot:
-        plot_predicted_data(test_predict, train_predict, date_list, price_list, symbol)
-        plot_metric_results(rmse_train, rmse_test, mape_train, mape_test, symbol)
+        plot_predicted_data(test_predict_lstm, train_predict_lstm, date_list, price_list, symbol)
+        plot_metric_results(rmse_train_lstm, rmse_test_lstm, mape_train_lstm, mape_test_lstm, symbol)
+
+        plot_predicted_data(test_predict_gru, train_predict_gru, date_list, price_list, symbol)
+        plot_metric_results(rmse_train_gru, rmse_test_gru, mape_train_gru, mape_test_gru, symbol)
 
     ####################
     # Save the results #
     ####################
     lstm_model.summary()
+    gru_model.summary()
+    # ret = lstm_model.evaluate(test, test_predict)
 
-    ret = lstm_model.evaluate(test, test_predict)
-    # print(ret)
+    predicted_data_lstm = np.concatenate((train_predict_lstm, test_predict_lstm), axis=0)
+    predicted_data_lstm = predicted_data_lstm.tolist()
 
-    predicted_data = np.concatenate((train_predict, test_predict), axis=0)
-    predicted_data = predicted_data.tolist()
+    predicted_data_gru = np.concatenate((train_predict_gru, test_predict_gru), axis=0)
+    predicted_data_gru = predicted_data_gru.tolist()
 
     results = {
-        "rmse_train": rmse_train,
-        "rmse_test": rmse_test,
-        "mape_train": mape_train,
-        "mape_test": mape_test,
-        "model": lstm_model,
-        "predicted_data": predicted_data,
+        'lstm': {
+            "rmse_train": rmse_train_lstm,
+            "rmse_test": rmse_test_lstm,
+            "mape_train": mape_train_lstm,
+            "mape_test": mape_test_lstm,
+            "model": lstm_model,
+            "predicted_data": predicted_data_lstm,
+        },
+        'gru': {
+            "rmse_train": rmse_train_gru,
+            "rmse_test": rmse_test_gru,
+            "mape_train": mape_train_gru,
+            "mape_test": mape_test_gru,
+            "model": gru_model,
+            "predicted_data": predicted_data_gru,
+        }
     }
 
     return results
@@ -316,8 +354,8 @@ def generate_all_predictions():
 
 
 def main():
-    # stock_prediction_lstm(plot=True, new_model=True)
-    generate_all_predictions()
+    stock_prediction_lstm(plot=False, new_model=False)
+    # generate_all_predictions()
 
 
 if __name__ == "__main__":

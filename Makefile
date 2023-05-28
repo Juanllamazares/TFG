@@ -13,4 +13,4 @@ generate_models:
 	python3 backend/main.py
 
 heroku:
-	git push heroku main    
+	git push heroku main
