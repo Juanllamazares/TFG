@@ -79,8 +79,8 @@ def plot_loss_chart(history_dict, param):
     mape_values = history_dict['mean_absolute_percentage_error']
     rmse_values = history_dict['root_mean_squared_error']
     plt.plot(epochs, loss_values, 'bo', label='Training loss')
-    plt.plot(epochs, mape_values, 'b', label='MAPE')
-    plt.plot(epochs, rmse_values, 'r', label='RMSE')
+    plt.plot(epochs, mape_values, 'b', label='MAPE ' + param)
+    plt.plot(epochs, rmse_values, 'r', label='RMSE' + param)
 
     plt.title('Training loss ' + param)
     plt.xlabel('Epochs')
@@ -224,11 +224,11 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     # Plot the results #
     #############################
     if plot:
-        plot_predicted_data(test_predict_lstm, train_predict_lstm, date_list, price_list, symbol)
-        plot_metric_results(rmse_train_lstm, rmse_test_lstm, mape_train_lstm, mape_test_lstm, symbol)
+        plot_predicted_data(test_predict_lstm, train_predict_lstm, date_list, price_list, symbol, 'LSTM')
+        plot_metric_results(rmse_train_lstm, rmse_test_lstm, mape_train_lstm, mape_test_lstm, symbol, 'LSTM')
 
-        plot_predicted_data(test_predict_gru, train_predict_gru, date_list, price_list, symbol)
-        plot_metric_results(rmse_train_gru, rmse_test_gru, mape_train_gru, mape_test_gru, symbol)
+        plot_predicted_data(test_predict_gru, train_predict_gru, date_list, price_list, symbol, 'GRU')
+        plot_metric_results(rmse_train_gru, rmse_test_gru, mape_train_gru, mape_test_gru, symbol, 'GRU')
 
     ####################
     # Save the results #
@@ -265,32 +265,32 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     return results
 
 
-def plot_predicted_data(test_predict, train_predict, date_list, price_list, symbol):
+def plot_predicted_data(test_predict, train_predict, date_list, price_list, symbol, param):
     plt.plot(date_list, price_list, color='blue', label='Real stock price data')
     plt.plot(date_list[:len(train_predict)], train_predict.flatten(), color='green', label='Train')
     plt.plot(date_list[len(train_predict):], test_predict.flatten(), color='black', label='Prediction')
-    plt.title("Stock Price Prediction")
+    plt.title("Stock Price Prediction " + param)
     plt.gcf().autofmt_xdate()
     plt.xlabel("Date")
     plt.xticks(np.arange(0, len(date_list), 50), date_list[::50], rotation=45)
     plt.xlabel("Date")
     plt.ylabel("Stock Price")
     plt.legend(loc='best')
-    file_name = "RESULT_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol
+    file_name = "RESULT_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol+'_'+param
     if not os.path.exists("results/" + file_name + ".png"):
         plt.savefig("results/" + file_name + ".png")
     plt.show()
 
 
-def plot_metric_results(rmse_train, rmse_test, mape_train, mape_test, symbol, save=False):
+def plot_metric_results(rmse_train, rmse_test, mape_train, mape_test, symbol, param, save=False):
     plt.plot(rmse_train, color='red', label='Train')
     plt.plot(rmse_test, color='black', label='Test')
-    plt.title("RMSE")
+    plt.title("RMSE "+param)
     plt.xlabel("Epoch")
     plt.ylabel("RMSE")
     plt.legend(loc='best')
     if save:
-        file_name = "RMSE_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol
+        file_name = "RMSE_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol + '_' + param
         if not os.path.exists("results/" + file_name + ".png"):
             plt.savefig("results/" + file_name + ".png")
         # else:
@@ -299,17 +299,17 @@ def plot_metric_results(rmse_train, rmse_test, mape_train, mape_test, symbol, sa
 
     plt.plot(mape_train, color='red', label='Train')
     plt.plot(mape_test, color='black', label='Test')
-    plt.title("MAPE")
+    plt.title("MAPE "+param)
     plt.xlabel("Epoch")
     plt.ylabel("MAPE")
     plt.legend(loc='best')
     if save:
-        file_name = "MAPE_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol
+        file_name = "MAPE_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol + '_' + param
         plt.savefig("results/" + file_name + ".png")
     plt.show()
 
     if save:
-        file_name = "NUMERIC_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol
+        file_name = "NUMERIC_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol + '_' + param
         f = open("results/" + file_name + ".txt", "w")
         f.write("RMSE train: " + str(rmse_train))
         f.write("RMSE test: " + str(rmse_test))

@@ -45,8 +45,10 @@ def dashboard(request):
 
         context_dict = {
             "full_view": True,
-            "rmse_value": 10.2,
-            "mape_value": round(lstm_results["mape_train"], 2),
+            "rmse_value_lstm":  round(lstm_results["rmse_train"], 2),
+            "mape_value_lstm": round(lstm_results["mape_train"], 2),
+            "rmse_value_gru": round(gru_results["rmse_train"], 2),
+            "mape_value_gru": round(gru_results["mape_train"], 2),
             "stock": stock_dict,
             "labels": json.dumps(date_list),
             "first_date": first_date.strftime("%m/%Y"),

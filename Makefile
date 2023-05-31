@@ -10,7 +10,7 @@ migrate:
 
 
 generate_models:
-	python3 backend/main.py
+	python3 backend/main.py§
 
 heroku:
-	git push heroku main
+	git subtree push --prefix backend heroku main
