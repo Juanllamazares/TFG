@@ -2,13 +2,12 @@
 {% block body %}
 <div class="container">
     <div class="mt-4 justify-content-center">
-        <h1>Stock prediction using LSTM model</h1>
+        <h1>Stock prediction using neuronal networks</h1>
         <p>Write the name of the stock you want to search</p>
     </div>
-
-    <div class="d-flex justify-content-center">
-        <form action="" method="post">
-            <select id="symbol" name="symbol">
+    <form action="" method="post">
+        <div class="d-flex flex-nowrap justify-content-center w-50">
+            <select class="form-select" id="symbol" name="symbol">
                 <option value="AAPL">AAPL (Apple Inc.)</option>
                 <option value="MSFT">MSFT (Microsoft Corporation)</option>
                 <option value="AMZN">AMZN (Amazon.com Inc.)</option>
@@ -30,38 +29,43 @@
                 <option value="PFE">PFE (Pfizer Inc.)</option>
                 <option value="PFE">KO (Coca-Cola Company)</option>
             </select>
-            <input type="submit" value="Search"/>
-        </form>
-    </div>
+            <input type="submit" value="Search" class="btn btn-primary mx-2"/>
+        </div>
+    </form>
+    <p>If you have any questions, please check our most <a href="/faq">frequent questions here</a></p>
+
 
     {% if full_view %}
     <section class="mt-5">
         <div>
             <h4><u>LSTM model (Sequential model)</u></h4>
             <p><b>Description:</b><br>Test: 20%<br>Train: 80%</p>
-            <p><b>Root Mean Square Error (RMSE):</b> {{ rmse_value }}%</p>
-            <p><b>Mean Square Error (MAPE):</b> {{ mape_value }}%</p>
+        </div>
+        <div>
+            <h4>Results (LSTM)</h4>
+            <p><b>Root Mean Square Error (RMSE):</b> {{ rmse_value_lstm }}%</p>
+            <p><b>Mean Square Error (MAPE):</b> {{ mape_value_lstm }}%</p>
         </div>
 
         <h2>Predicting one day into the future (TRAIN vs TEST) [{{first_date}} - {{last_date}}]</h2>
-        <p><b>Definition:</b></p>
+        {% include "component/chart.html.j2" with stock_predicted_data=stock.predicted_data_lstm %}
+        <p><b>Close stock price:</b> The closing price is the last price at which a stock trades during a regular
+            trading session. It is the price at which a trader can close out an existing long or short position.</p>
 
-        <p><b>Close stock price:</b> The closing price is the last price at which a stock trades during a regular trading session. It is the price at which a trader can close out an existing long or short position.</p>
-        {% include "component/chart.html.j2" %}
         <br>
         <h2>Predicting next days [{{first_date}} - {{last_date}}]</h2>
         <p><b>Definition:</b> That is, prediction will predict future day based on previous data. </p>
-        {% include "component/chart2.html.j2" %}
 
-
-        <!--        <div>-->
-        <!--            <h4><u>Momentum</u></h4>-->
-        <!--        </div>-->
-
-        <!--        <div>-->
-        <!--            <h4><u>Fear and greed</u></h4>-->
-        <!--        </div>-->
-
+        <div>
+            <h4><u>GRU model (Sequential model)</u></h4>
+            <p><b>Description:</b><br>Test: 20%<br>Train: 80%</p>
+        </div>
+        <div>
+            <h4>Results (GRU)</h4>
+            <p><b>Root Mean Square Error (RMSE):</b> {{ rmse_value_gru }}%</p>
+            <p><b>Mean Square Error (MAPE):</b> {{ mape_value_gru }}%</p>
+        </div>
+        {% include "component/chart2.html.j2" with stock_predicted_data=stock.predicted_data_gru %}
     </section>
     {% endif %}
 

@@ -1,35 +1,41 @@
 {% extends "base.html" %}
 
 {% block body %}
-<title> </title>
+<title></title>
 <div>
+    <title>Frequently asked questions</title>
     <section class="mt-5 mx-auto w-75">
         <div class="text-left row h-100">
             <div class="col-sm-12 my-auto">
-                <h2>Frequently asked questions</h2>
-                <br>
-                <p>
-                    The goal of this work is to develop a web application tool to visualize different stock market
-                    prediction algorithms using machine learning.</p>
-                The idea is to obtain the minimum possible error
-                compared to the actual closing price of the stock. This will be achieved by means of users
-                interacting through the web, as well as allowing them to filter, search and analyze different
-                prediction algorithm models and compare them according to its effectiveness based on different
-                parameters.
-                <br><br>
-                <p>The data used will be extracted from different financial APIs. The project will be
-                    developed in a Python environment using Django as the main framework. </p>
-                <br>
+                <h3>What are LSTM and GRU models?</h3>
+                <p>LSTM and GRU models are two different types of Recurrent Neural Network (RNN) architectures. They are
+                    specifically used for making predictions about sequential data, such as time-series data like stock
+                    markets. These models are powerful tools for making predictions about stock markets because they are
+                    able to recognize patterns in the data, allowing them to more accurately predict what will happen in
+                    the future.</p>
 
-                <h4>Author: Juan Llamazares Ruiz</h4>
-                Contact: <a href="mailto:juan.llamazaresr@estudiante.uam.es" >juan.llamazaresr@estudiante.uam.es</a>
+                <h3>How does one use these models to predict stock prices in Python?</h3>
+                <p>The most popular way to use these models to predict stock prices in Python is to use the Keras
+                    library. It provides a high-level API for building and training models, allowing one to quickly
+                    create a model and adjust its parameters to improve accuracy. Additionally, there are several
+                    open-source libraries and frameworks available that can be used to make predictions using LSTM or
+                    GRU models. </p>
 
-                <br><br>
-                <a href="{% url 'dashboard' %}" class="btn btn-primary">Access now</a>
-                <br><br>
+                <h3>What are the advantages/disadvantages of using these models to predict stock prices?</h3>
+                <p>One of the advantages of using these models to predict stock prices is that they can learn and
+                    recognize patterns in the data, improving their accuracy over time. Furthermore, they are relatively
+                    easy to work with using the Keras library. The main disadvantage of using these models is that they
+                    can require a lot of computing power and can be time consuming to train.</p>
+
+                <h3>Are there any alternatives to using LSTM and GRU models to predict stock prices?</h3>
+                <p>Yes, there are several alternatives to using RNNs for stock prediction. One popular alternative is to
+                    use a Support Vector Regression model, which can be used to predict stock prices using other
+                    financial indicators. Other methods such as decision trees and random forests can also be used,
+                    though these methods have been shown to be less accurate than RNNs.</p>
+
             </div>
         </div>
-
+        <p class="mx-auto"><a href="/dashboard">Try the tool now!</a></p>
     </section>
 </div>
 {% endblock %}

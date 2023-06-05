@@ -245,16 +245,16 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
 
     results = {
         'lstm': {
-            "rmse_train": rmse_train_lstm,
-            "rmse_test": rmse_test_lstm,
+            "rmse_train": rmse_train_lstm.numpy()[0].item(0),
+            "rmse_test": rmse_test_lstm.numpy()[0].item(0),
             "mape_train": mape_train_lstm,
             "mape_test": mape_test_lstm,
             "model": lstm_model,
             "predicted_data": predicted_data_lstm,
         },
         'gru': {
-            "rmse_train": rmse_train_gru,
-            "rmse_test": rmse_test_gru,
+            "rmse_train": rmse_train_gru.numpy()[0].item(0),
+            "rmse_test": rmse_test_gru.numpy()[0].item(0),
             "mape_train": mape_train_gru,
             "mape_test": mape_test_gru,
             "model": gru_model,
@@ -276,7 +276,7 @@ def plot_predicted_data(test_predict, train_predict, date_list, price_list, symb
     plt.xlabel("Date")
     plt.ylabel("Stock Price")
     plt.legend(loc='best')
-    file_name = "RESULT_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol+'_'+param
+    file_name = "RESULT_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol + '_' + param
     if not os.path.exists("results/" + file_name + ".png"):
         plt.savefig("results/" + file_name + ".png")
     plt.show()
@@ -285,7 +285,7 @@ def plot_predicted_data(test_predict, train_predict, date_list, price_list, symb
 def plot_metric_results(rmse_train, rmse_test, mape_train, mape_test, symbol, param, save=False):
     plt.plot(rmse_train, color='red', label='Train')
     plt.plot(rmse_test, color='black', label='Test')
-    plt.title("RMSE "+param)
+    plt.title("RMSE " + param)
     plt.xlabel("Epoch")
     plt.ylabel("RMSE")
     plt.legend(loc='best')
@@ -299,7 +299,7 @@ def plot_metric_results(rmse_train, rmse_test, mape_train, mape_test, symbol, pa
 
     plt.plot(mape_train, color='red', label='Train')
     plt.plot(mape_test, color='black', label='Test')
-    plt.title("MAPE "+param)
+    plt.title("MAPE " + param)
     plt.xlabel("Epoch")
     plt.ylabel("MAPE")
     plt.legend(loc='best')
@@ -348,13 +348,33 @@ def create_gru_model(train, metrics):
 
 def generate_all_predictions():
     n_days = 365
-    stock_list = ['AAPL', 'MSFT', 'AMZN', 'TSLA', 'GOOGL']
+    stock_list = [
+        'AAPL'
+        , 'MSFT'
+        , 'AMZN'
+        , 'TSLA'
+        , 'GOOGL'
+        , 'GOOG'
+        , 'BRK.B'
+        , 'UNH'
+        , 'JNJ'
+        , 'XOM'
+        , 'NVDA'
+        , 'META'
+        , 'PG'
+        , 'JPM'
+        , 'V'
+        , 'CVX'
+        , 'HD'
+        , 'MA'
+        , 'PFE'
+        , 'KO']
     for stock in stock_list:
         stock_prediction_lstm(plot=True, new_model=True, symbol=stock, n_days=n_days)
 
 
 def main():
-    stock_prediction_lstm(plot=False, new_model=False)
+    stock_prediction_lstm(plot=False, new_model=True)
     # generate_all_predictions()
 
 

@@ -1,6 +1,9 @@
-<div>
-    <div id="container" style="width: 75%;">
+<div class="row">
+    <div class="row" id="container" style="width: 50%;">
         <canvas id="line-chart-1" width="800" height="450"></canvas>
+    </div>
+    <div class="row" id="container" style="width: 50%;">
+        <canvas id="line-chart-2" width="800" height="450"></canvas>
     </div>
 </div>
 {% block javascript %}
@@ -17,7 +20,7 @@
                     fill: false
                 },
                 {
-                    data: {{ stock.predicted_data | safe}},
+                    data: {{ stock_predicted_data | safe}},
                     label: "Predicted stock price",
                     borderColor: "#8e5ea2",
                     fill: false
@@ -45,6 +48,60 @@
             elements: {
                 point: {
                     radius: 0
+                }
+            },
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Close price'
+                    }
+                }],
+                xAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Date'
+                    },
+                    ticks: {
+                        autoSkip: true,
+                        maxTicksLimit: 25
+                    }
+                }],
+            }
+        }
+    });
+</script>
+<script>
+    new Chart(document.getElementById("line-chart-2"), {
+        type: 'line',
+        data: {
+            labels: {{ stock.labels | safe}},
+            datasets: [
+                {
+                    data: {{ stock.data | safe}},
+                    label: "Actual stock price",
+                    borderColor: "#3e95cd",
+                    fill: false,
+                },
+                {
+                    data: {{ stock_predicted_data | safe}},
+                    label: "Predicted stock price",
+                    borderColor: "#8e5ea2",
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    display: true
+                },
+                tooltips: {
+                    enabled: false
                 }
             },
             scales: {
