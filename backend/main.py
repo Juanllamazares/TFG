@@ -86,6 +86,7 @@ def plot_loss_chart(history_dict, param):
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
+    plt.grid()
     plt.show()
 
 
@@ -279,6 +280,7 @@ def plot_predicted_data(test_predict, train_predict, date_list, price_list, symb
     file_name = "RESULT_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol + '_' + param
     if not os.path.exists("results/" + file_name + ".png"):
         plt.savefig("results/" + file_name + ".png")
+    plt.grid()
     plt.show()
 
 
@@ -295,6 +297,7 @@ def plot_metric_results(rmse_train, rmse_test, mape_train, mape_test, symbol, pa
             plt.savefig("results/" + file_name + ".png")
         # else:
         #     plt.savefig("results/"+file_name+"_.png")
+    plt.grid()
     plt.show()
 
     plt.plot(mape_train, color='red', label='Train')
@@ -306,6 +309,7 @@ def plot_metric_results(rmse_train, rmse_test, mape_train, mape_test, symbol, pa
     if save:
         file_name = "MAPE_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol + '_' + param
         plt.savefig("results/" + file_name + ".png")
+    plt.grid()
     plt.show()
 
     if save:
