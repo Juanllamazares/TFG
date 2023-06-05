@@ -6,24 +6,22 @@ import json
 from keras.models import Sequential
 from keras.layers import Dense, GRU
 from keras.layers import LSTM
-from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
 import requests
-import math
 from sklearn.preprocessing import MinMaxScaler
 from keras import backend
 
 API_KEY = "KW8CD0CRFLR2LKS0"
 
 
-def get_stock_price(symbol, new=False):
+def get_stock_price(symbol, new=True):
     dataset = {}
     file_name = 'stock_' + str(symbol) + '.csv'
     file_path = 'backend/data/' + file_name
 
-    if os.path.exists(file_path):
+    if os.path.exists(file_path) and not new:
         with open(file_path, 'r') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
@@ -68,9 +66,9 @@ def rmse(y_true, y_pred):
     return backend.sqrt(backend.mean(backend.square(y_pred - y_true), axis=-1))
 
 
-def mape(y_true, y_pred):
-    y_true, y_pred = np.array(y_true), np.array(y_pred)
-    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+def mape(y_test, y_pred):
+    y_test, pred = np.array(y_test), np.array(y_pred)
+    return np.mean(np.abs((y_test - pred) / y_test)) * 100
 
 
 def plot_loss_chart(history_dict, param):
@@ -80,7 +78,7 @@ def plot_loss_chart(history_dict, param):
     rmse_values = history_dict['root_mean_squared_error']
     plt.plot(epochs, loss_values, 'bo', label='Training loss')
     plt.plot(epochs, mape_values, 'b', label='MAPE ' + param)
-    plt.plot(epochs, rmse_values, 'r', label='RMSE' + param)
+    plt.plot(epochs, rmse_values, 'r', label='RMSE ' + param)
 
     plt.title('Training loss ' + param)
     plt.xlabel('Epochs')
@@ -112,7 +110,7 @@ def stock_prediction_lstm(symbol: str = "AAPL", n_days: int = 365, plot: bool = 
     # Data extraction #
     ###################
 
-    data = get_stock_price(symbol)
+    data = get_stock_price(symbol, new_model)
     # Train and test split
     test_ratio = 0.2
     training_ratio = 1 - test_ratio
@@ -280,7 +278,6 @@ def plot_predicted_data(test_predict, train_predict, date_list, price_list, symb
     file_name = "RESULT_" + datetime.today().strftime('%d%m%Y_%H:%M') + "_" + symbol + '_' + param
     if not os.path.exists("results/" + file_name + ".png"):
         plt.savefig("results/" + file_name + ".png")
-    plt.grid()
     plt.show()
 
 
@@ -378,7 +375,7 @@ def generate_all_predictions():
 
 
 def main():
-    stock_prediction_lstm(plot=False, new_model=True)
+    stock_prediction_lstm(plot=True, new_model=True)
     # generate_all_predictions()
 
 
