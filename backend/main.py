@@ -77,10 +77,10 @@ def plot_loss_chart(history_dict, param):
     mape_values = history_dict['mean_absolute_percentage_error']
     rmse_values = history_dict['root_mean_squared_error']
     plt.plot(epochs, loss_values, 'bo', label='Training loss')
-    plt.plot(epochs, mape_values, 'b', label='MAPE ' + param)
-    plt.plot(epochs, rmse_values, 'r', label='RMSE ' + param)
+    # plt.plot(epochs, mape_values, 'b', label='MAPE ' + param)
+    # plt.plot(epochs, rmse_values, 'r', label='RMSE ' + param)
 
-    plt.title('Training loss ' + param)
+    plt.title(param)
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
@@ -346,6 +346,8 @@ def create_gru_model(train, metrics):
     history = gru_model.fit(train, train, epochs=100, batch_size=32, verbose=2)
     return gru_model, history
 
+def predict_future_values():
+    return
 
 def generate_all_predictions():
     n_days = 365
@@ -371,7 +373,7 @@ def generate_all_predictions():
         , 'PFE'
         , 'KO']
     for stock in stock_list:
-        stock_prediction_lstm(plot=True, new_model=True, symbol=stock, n_days=n_days)
+        stock_prediction_lstm(plot=False, new_model=True, symbol=stock, n_days=n_days)
 
 
 def main():
