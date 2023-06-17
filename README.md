@@ -3,7 +3,7 @@
 
 Theme
 
-Develop a web application to interact with predictive algorithms about the stock market.
+Developing a web application to interact with predictive algorithms about the stock market.
 
 Description
 
