@@ -29,6 +29,10 @@
                 <option value="PFE">PFE (Pfizer Inc.)</option>
                 <option value="PFE">KO (Coca-Cola Company)</option>
             </select>
+            <select class="mx-2 form-select" id="size" name="size">
+                <option value="MSFT">Compress size</option>
+                <option value="AAPL">Full size (Paid version)</option>
+            </select>
             <input type="submit" value="Search" class="btn btn-primary mx-2"/>
         </div>
     </form>
@@ -45,18 +49,13 @@
         <div>
             <h4>Results (LSTM)</h4>
             <p><b>Root Mean Square Error (RMSE):</b> {{ rmse_value_lstm }}%</p>
-            <p><b>Mean Square Error (MAPE):</b> {{ mape_value_lstm }}%</p>
+<!--            <p><b>Mean Square Error (MAPE):</b> {{ mape_value_lstm }}%</p>-->
         </div>
 
-        <h2>Predicting one day into the future (TRAIN vs TEST) [{{first_date}} - {{last_date}}]</h2>
+        <h2>Prediction [{{first_date}} - {{last_date}}]</h2>
         {% include "component/chart.html.j2" with stock_predicted_data=stock.predicted_data_lstm %}
-        <p><b>Close stock price:</b> The closing price is the last price at which a stock trades during a regular
-            trading session. It is the price at which a trader can close out an existing long or short position.</p>
 
-        <br>
-        <h2>Predicting next days [{{first_date}} - {{last_date}}]</h2>
-        <p><b>Definition:</b> That is, prediction will predict future day based on previous data. </p>
-
+        <br><br><br>
         <div>
             <h4><u>GRU model (Sequential model)</u></h4>
             <p><b>Description:</b><br>Test: 20%<br>Train: 80%</p>
@@ -64,22 +63,23 @@
         <div>
             <h4>Results (GRU)</h4>
             <p><b>Root Mean Square Error (RMSE):</b> {{ rmse_value_gru }}%</p>
-            <p><b>Mean Square Error (MAPE):</b> {{ mape_value_gru }}%</p>
+<!--            <p><b>Mean Square Error (MAPE):</b> {{ mape_value_gru }}%</p>-->
         </div>
+        <h2>Prediction [{{first_date}} - {{last_date}}]</h2>
         {% include "component/chart2.html.j2" with stock_predicted_data=stock.predicted_data_gru %}
     </section>
-    {% endif %}
 
-<!--    <section class="mt-5">-->
-<!--        <h3>Extra information</h3>-->
-<!--        <ul>-->
-<!--            <li>LSTM is an RNN (recurrent neuronal network) which means is has incorporated memory to take any-->
-<!--                information from previous inputs and outputs to influence future inputs and outputs-->
-<!--            </li>-->
-<!--            <li>Traditional networks assume that every input and output are independent of each other.</li>-->
-<!--        </ul>-->
+    <br><br><br>
+    <h2>Terminology</h2><br>
+    <p>
+     <b>Stock:</b> also known as an equity, is a type of security that signifies ownership in a company and represents a claim on the company's assets and earnings.<br>
+     <b>Stock market:</b> is a form of exchange where buyers and sellers trade ownership stakes in publicly traded companies, as well as derivatives and other financial instruments, such as options and futures.<br>
+     <b>Stock close price:</b> is the final price at which a stock trades on any given day of trading.<br>
+     <b>Stock split:</b>  action that occurs when a stock’s existing shares are split into multiple smaller shares to reduce their market price. It usually happens when a company's stock has become too expensive for potential investors to buy.<br>
+    </p>
+    {% endif %}
     </section>
 </div>
-
+<br><br><br><br>
 
 {% endblock %}
